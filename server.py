@@ -1,19 +1,37 @@
 """
 Web Server cho Chatbot - Sử dụng Groq API (Llama 3.1)
+Phiên bản DEPLOY - sử dụng embeddings.npy và chunks.json (không load docx)
 """
 from flask import Flask, render_template_string, request, jsonify
 from flask_cors import CORS
-from chatbot import DocumentChatbot
 import os
+
+# Kiểm tra môi trường: deploy hay local?
+IS_DEPLOY = os.environ.get("RENDER") or os.environ.get("RAILWAY_ENVIRONMENT") or os.environ.get("REPLIT_DB_URL")
+
+if IS_DEPLOY:
+    # DEPLOY: Dùng phiên bản nhẹ (không load docx)
+    from chatbot_deploy import DocumentChatbot
+    print("🚀 DEPLOY MODE: Sử dụng chatbot_deploy (nhẹ)")
+else:
+    # LOCAL: Dùng phiên bản đầy đủ (load docx)
+    from chatbot import DocumentChatbot
+    print("💻 LOCAL MODE: Sử dụng chatbot (đầy đủ)")
+
 app = Flask(__name__)
 CORS(app)
 
-# Khởi tạo chatbot ngay khi start (không lazy load để đảm bảo hoạt động)
+# Khởi tạo chatbot ngay khi start
 print("="*50)
 print("Đang khởi tạo chatbot với Groq API (Llama 3.1)...")
 try:
-    chatbot = DocumentChatbot(doc_folder="doc")
-    chatbot.load_documents()
+    if IS_DEPLOY:
+        # Deploy: không cần doc_folder, chỉ load embeddings.npy
+        chatbot = DocumentChatbot()
+    else:
+        # Local: load từ docx
+        chatbot = DocumentChatbot(doc_folder="doc")
+        chatbot.load_documents()
     print("✅ Chatbot đã sẵn sàng!")
     print("="*50)
 except Exception as e:

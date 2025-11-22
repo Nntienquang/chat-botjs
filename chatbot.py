@@ -47,10 +47,12 @@ class DocumentChatbot:
         print("Đang tải mô hình embedding (nhẹ hơn để tiết kiệm memory)...")
         try:
             # Dùng model nhẹ hơn để tiết kiệm memory
-            self.model = SentenceTransformer('all-MiniLM-L6-v2')
+            self.model = SentenceTransformer('all-MiniLM-L12-v2', device='cpu')
+
         except:
             # Fallback nếu không tải được
-            self.model = SentenceTransformer('all-MiniLM-L6-v2')
+            self.model = SentenceTransformer('all-MiniLM-L12-v2', device='cpu')
+
         print("✓ Đã tải mô hình embedding thành công!")
         
         # Tải Q&A dataset nếu có

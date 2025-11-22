@@ -42,3 +42,8 @@ test_*.py
 *_test.py
 TEST_*.bat
 
+# Embeddings files (NHƯNG CẦN COMMIT embeddings.npy và chunks.json cho deploy!)
+# Không ignore 2 files này vì deploy cần
+# embeddings.npy
+# chunks.json
+
