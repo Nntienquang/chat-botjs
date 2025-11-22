@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Models (nếu quá lớn)
+*.bin
+*.pt
+*.pth
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.temp
+
+# Word temporary files
+~$*.docx
+~$*.doc
+
