@@ -11,6 +11,10 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 import re
 from typing import List, Tuple, Optional
+from dotenv import load_dotenv
+
+# Load biến môi trường từ file .env
+load_dotenv()
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 

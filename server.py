@@ -5,6 +5,10 @@ Phiên bản DEPLOY - sử dụng embeddings.npy và chunks.json (không load do
 from flask import Flask, render_template_string, request, jsonify
 from flask_cors import CORS
 import os
+from dotenv import load_dotenv
+
+# Load biến môi trường từ file .env
+load_dotenv()
 
 # Kiểm tra môi trường: deploy hay local?
 IS_DEPLOY = os.environ.get("RENDER") or os.environ.get("RAILWAY_ENVIRONMENT") or os.environ.get("REPLIT_DB_URL")

@@ -11,9 +11,13 @@ from sentence_transformers import SentenceTransformer
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from groq import Groq
+from dotenv import load_dotenv
+
+# Load biến môi trường từ file .env
+load_dotenv()
 
 # Groq API (FREE - Llama 3.1)
-# Lấy từ biến môi trường (bắt buộc)
+# Lấy từ file .env hoặc biến môi trường
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 
 class DocumentChatbot:

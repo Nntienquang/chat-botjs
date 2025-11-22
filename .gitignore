@@ -30,6 +30,7 @@ Thumbs.db
 # Environment
 .env
 .env.local
+# Giữ lại .env.example để làm mẫu
 
 # Temporary files
 *.tmp
