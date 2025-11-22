@@ -1,0 +1,18 @@
+{
+    "questions": [{
+            "question": "Tên thật của Hàn Mặc Tử là gì?",
+            "answer": "Tên thật của Hàn Mặc Tử là Nguyễn Trọng Trí.",
+            "keywords": ["tên thật", "hàn mặc tử", "nguyễn trọng trí"]
+        },
+        {
+            "question": "Hàn Mặc Tử sinh năm nào?",
+            "answer": "Hàn Mặc Tử sinh năm 1912.",
+            "keywords": ["năm sinh", "sinh năm", "1912"]
+        },
+        {
+            "question": "Hàn Mặc Tử mất năm nào?",
+            "answer": "Hàn Mặc Tử mất năm 1940.",
+            "keywords": ["năm mất", "mất năm", "1940"]
+        }
+    ]
+}

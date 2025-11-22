@@ -1,0 +1,10 @@
+groq
+python-docx
+sentence-transformers
+numpy
+PyPDF2
+scikit-learn
+flask
+flask-cors
+gunicorn
+
