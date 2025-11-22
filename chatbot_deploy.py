@@ -34,8 +34,9 @@ class DocumentChatbot:
         print("🔄 Đang load embeddings (deploy version)...")
         try:
             self.chunks = json.load(open("chunks.json", encoding="utf-8"))
-            self.embeddings = np.load("embeddings.npy")
-            print(f"✅ Loaded {len(self.chunks)} chunks & embeddings shape: {self.embeddings.shape}")
+            # Load embeddings với mmap_mode để tiết kiệm memory
+            self.embeddings = np.load("embeddings.npy", mmap_mode='r')
+            print(f"✅ Loaded {len(self.chunks)} chunks & embeddings shape: {self.embeddings.shape} (memory-mapped)")
         except FileNotFoundError as e:
             print(f"❌ Không tìm thấy embeddings.npy hoặc chunks.json!")
             print(f"   Lỗi: {e}")
@@ -47,14 +48,9 @@ class DocumentChatbot:
             self.chunks = []
             self.embeddings = None
         
-        # Load model nhẹ (chỉ để encode query)
-        print("🔄 Đang load model embedding (nhẹ)...")
-        try:
-            self.model = SentenceTransformer("all-MiniLM-L6-v2")
-            print("✅ Model embedding đã sẵn sàng")
-        except Exception as e:
-            print(f"❌ Lỗi khi load model: {e}")
-            self.model = None
+        # KHÔNG load model ngay - lazy load khi cần
+        self.model = None
+        print("✅ Embeddings đã sẵn sàng (model sẽ load khi cần)")
         
         # Load Q&A dataset nếu có
         self.load_qa_dataset()
@@ -99,13 +95,31 @@ class DocumentChatbot:
         
         return best_match if best_score > 1 else None
     
+    def _get_model(self):
+        """Lazy load model - chỉ load khi cần"""
+        if self.model is None:
+            print("🔄 Lazy loading model embedding...")
+            try:
+                self.model = SentenceTransformer("all-MiniLM-L6-v2")
+                print("✅ Model đã sẵn sàng")
+            except Exception as e:
+                print(f"❌ Lỗi khi load model: {e}")
+                return None
+        return self.model
+    
     def search(self, query: str, top_k: int = 5) -> List[Tuple[str, float]]:
         """Tìm kiếm semantic"""
-        if not self.chunks or self.embeddings is None or self.model is None:
+        if not self.chunks or self.embeddings is None:
+            return []
+        
+        model = self._get_model()
+        if model is None:
             return []
         
         try:
-            q_emb = self.model.encode([query])
+            # Encode query
+            q_emb = model.encode([query], show_progress_bar=False)
+            # Tính similarity với memory-mapped embeddings
             sim = cosine_similarity(q_emb, self.embeddings)[0]
             idx = np.argsort(sim)[::-1][:top_k]
             

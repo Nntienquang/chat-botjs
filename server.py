@@ -24,15 +24,18 @@ CORS(app)
 # Khởi tạo chatbot ngay khi start
 print("="*50)
 print("Đang khởi tạo chatbot với Groq API (Llama 3.1)...")
+chatbot = None
 try:
     if IS_DEPLOY:
-        # Deploy: không cần doc_folder, chỉ load embeddings.npy
+        # Deploy: không cần doc_folder, chỉ load embeddings.npy (memory-mapped)
+        # KHÔNG load model ngay - lazy load khi có request
         chatbot = DocumentChatbot()
+        print("✅ Chatbot đã sẵn sàng! (Model sẽ load khi có request đầu tiên)")
     else:
         # Local: load từ docx
         chatbot = DocumentChatbot(doc_folder="doc")
         chatbot.load_documents()
-    print("✅ Chatbot đã sẵn sàng!")
+        print("✅ Chatbot đã sẵn sàng!")
     print("="*50)
 except Exception as e:
     print(f"❌ LỖI NGHIÊM TRỌNG: Không thể khởi tạo chatbot!")
