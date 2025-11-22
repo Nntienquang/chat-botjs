@@ -36,10 +36,12 @@ class DocumentChatbot:
             print(f"❌ Lỗi kết nối Groq API: {e}")
             self.groq_client = None
         
-        print("Đang tải mô hình embedding...")
+        print("Đang tải mô hình embedding (nhẹ hơn để tiết kiệm memory)...")
         try:
-            self.model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+            # Dùng model nhẹ hơn để tiết kiệm memory
+            self.model = SentenceTransformer('all-MiniLM-L6-v2')
         except:
+            # Fallback nếu không tải được
             self.model = SentenceTransformer('all-MiniLM-L6-v2')
         print("✓ Đã tải mô hình embedding thành công!")
         
@@ -153,11 +155,18 @@ class DocumentChatbot:
         
         print(f"Đã đọc {len(self.chunks)} chunks từ {len(all_files)} files")
         
-        # Tạo embeddings
+        # Tạo embeddings (batch nhỏ để tiết kiệm memory)
         if self.chunks:
-            print("Đang tạo embeddings...")
-            self.embeddings = self.model.encode(self.chunks, show_progress_bar=True)
-            print("✓ Đã tạo embeddings thành công!")
+            print("Đang tạo embeddings (batch processing để tiết kiệm memory)...")
+            # Xử lý theo batch để tiết kiệm memory
+            batch_size = 32
+            embeddings_list = []
+            for i in range(0, len(self.chunks), batch_size):
+                batch = self.chunks[i:i+batch_size]
+                batch_embeddings = self.model.encode(batch, show_progress_bar=False)
+                embeddings_list.append(batch_embeddings)
+            self.embeddings = np.vstack(embeddings_list)
+            print(f"✓ Đã tạo embeddings thành công! ({len(self.chunks)} chunks)")
     
     def split_text(self, text: str, chunk_size: int = 800) -> List[str]:
         """Chia text thành chunks"""

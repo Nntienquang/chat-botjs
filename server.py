@@ -4,17 +4,24 @@ Web Server cho Chatbot - Sử dụng Groq API (Llama 3.1)
 from flask import Flask, render_template_string, request, jsonify
 from flask_cors import CORS
 from chatbot import DocumentChatbot
-
+import os
 app = Flask(__name__)
 CORS(app)
 
-# Khởi tạo chatbot
-print("="*50)
-print("Đang khởi tạo chatbot với Groq API (Llama 3.1)...")
-chatbot = DocumentChatbot(doc_folder="doc")
-chatbot.load_documents()
-print("Chatbot đã sẵn sàng!")
-print("="*50)
+# Khởi tạo chatbot (lazy loading để tiết kiệm memory)
+chatbot = None
+
+def get_chatbot():
+    """Lazy load chatbot để tiết kiệm memory"""
+    global chatbot
+    if chatbot is None:
+        print("="*50)
+        print("Đang khởi tạo chatbot với Groq API (Llama 3.1)...")
+        chatbot = DocumentChatbot(doc_folder="doc")
+        chatbot.load_documents()
+        print("Chatbot đã sẵn sàng!")
+        print("="*50)
+    return chatbot
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -211,7 +218,9 @@ def ask():
         if not question:
             return jsonify({'answer': 'Xin lỗi, bạn chưa nhập câu hỏi.'}), 400
         
-        answer = chatbot.answer(question)
+        # Lazy load chatbot khi cần
+        bot = get_chatbot()
+        answer = bot.answer(question)
         return jsonify({'answer': answer})
     except Exception as e:
         return jsonify({'answer': f'Xin lỗi, đã xảy ra lỗi: {str(e)}'}), 500
