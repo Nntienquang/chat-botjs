@@ -31,11 +31,13 @@ class DocumentChatbot:
         # Khởi tạo Groq client
         if not GROQ_API_KEY:
             print("❌ GROQ_API_KEY không được set! Vui lòng thêm biến môi trường GROQ_API_KEY")
+            print("   Kiểm tra: Settings → Environment Variables → GROQ_API_KEY")
             self.groq_client = None
         else:
             try:
+                print(f"🔑 Đang kết nối Groq API với key: {GROQ_API_KEY[:15]}...")
                 self.groq_client = Groq(api_key=GROQ_API_KEY)
-                print(f"✓ Đã kết nối Groq API thành công! (Key: {GROQ_API_KEY[:10]}...)")
+                print(f"✅ Đã kết nối Groq API thành công!")
             except Exception as e:
                 print(f"❌ Lỗi kết nối Groq API: {e}")
                 import traceback

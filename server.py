@@ -8,26 +8,21 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-# Khởi tạo chatbot (lazy loading để tiết kiệm memory)
-chatbot = None
-
-def get_chatbot():
-    """Lazy load chatbot để tiết kiệm memory"""
-    global chatbot
-    if chatbot is None:
-        try:
-            print("="*50)
-            print("Đang khởi tạo chatbot với Groq API (Llama 3.1)...")
-            chatbot = DocumentChatbot(doc_folder="doc")
-            chatbot.load_documents()
-            print("Chatbot đã sẵn sàng!")
-            print("="*50)
-        except Exception as e:
-            print(f"❌ Lỗi khi khởi tạo chatbot: {e}")
-            import traceback
-            traceback.print_exc()
-            raise
-    return chatbot
+# Khởi tạo chatbot ngay khi start (không lazy load để đảm bảo hoạt động)
+print("="*50)
+print("Đang khởi tạo chatbot với Groq API (Llama 3.1)...")
+try:
+    chatbot = DocumentChatbot(doc_folder="doc")
+    chatbot.load_documents()
+    print("✅ Chatbot đã sẵn sàng!")
+    print("="*50)
+except Exception as e:
+    print(f"❌ LỖI NGHIÊM TRỌNG: Không thể khởi tạo chatbot!")
+    print(f"Chi tiết lỗi: {e}")
+    import traceback
+    traceback.print_exc()
+    chatbot = None
+    print("="*50)
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -216,18 +211,35 @@ HTML_TEMPLATE = """
 def index():
     return render_template_string(HTML_TEMPLATE)
 
+@app.route('/health', methods=['GET'])
+def health():
+    """Health check endpoint"""
+    if chatbot is None:
+        return jsonify({'status': 'error', 'message': 'Chatbot chưa được khởi tạo'}), 500
+    return jsonify({'status': 'ok', 'message': 'Chatbot đã sẵn sàng'}), 200
+
 @app.route('/ask', methods=['POST'])
 def ask():
     try:
+        # Kiểm tra chatbot đã được khởi tạo chưa
+        if chatbot is None:
+            print("❌ Chatbot chưa được khởi tạo!")
+            return jsonify({'answer': 'Xin lỗi, chatbot chưa sẵn sàng. Vui lòng thử lại sau.'}), 503
+        
         data = request.json
-        question = data.get('question', '')
+        if not data:
+            return jsonify({'answer': 'Xin lỗi, dữ liệu không hợp lệ.'}), 400
+            
+        question = data.get('question', '').strip()
         if not question:
             return jsonify({'answer': 'Xin lỗi, bạn chưa nhập câu hỏi.'}), 400
         
-        # Lazy load chatbot khi cần
+        print(f"📥 Nhận câu hỏi: {question[:50]}...")
+        
+        # Xử lý câu hỏi
         try:
-            bot = get_chatbot()
-            answer = bot.answer(question)
+            answer = chatbot.answer(question)
+            print(f"✅ Trả lời thành công (độ dài: {len(answer)} ký tự)")
             return jsonify({'answer': answer})
         except Exception as e:
             print(f"❌ Lỗi khi xử lý câu hỏi: {e}")
