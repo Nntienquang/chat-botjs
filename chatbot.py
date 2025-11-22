@@ -29,12 +29,18 @@ class DocumentChatbot:
         self.model = None
         
         # Khởi tạo Groq client
-        try:
-            self.groq_client = Groq(api_key=GROQ_API_KEY)
-            print(f"✓ Đã kết nối Groq API thành công! (Key: {GROQ_API_KEY[:10]}...)")
-        except Exception as e:
-            print(f"❌ Lỗi kết nối Groq API: {e}")
+        if not GROQ_API_KEY:
+            print("❌ GROQ_API_KEY không được set! Vui lòng thêm biến môi trường GROQ_API_KEY")
             self.groq_client = None
+        else:
+            try:
+                self.groq_client = Groq(api_key=GROQ_API_KEY)
+                print(f"✓ Đã kết nối Groq API thành công! (Key: {GROQ_API_KEY[:10]}...)")
+            except Exception as e:
+                print(f"❌ Lỗi kết nối Groq API: {e}")
+                import traceback
+                traceback.print_exc()
+                self.groq_client = None
         
         print("Đang tải mô hình embedding (nhẹ hơn để tiết kiệm memory)...")
         try:

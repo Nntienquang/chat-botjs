@@ -15,12 +15,18 @@ def get_chatbot():
     """Lazy load chatbot để tiết kiệm memory"""
     global chatbot
     if chatbot is None:
-        print("="*50)
-        print("Đang khởi tạo chatbot với Groq API (Llama 3.1)...")
-        chatbot = DocumentChatbot(doc_folder="doc")
-        chatbot.load_documents()
-        print("Chatbot đã sẵn sàng!")
-        print("="*50)
+        try:
+            print("="*50)
+            print("Đang khởi tạo chatbot với Groq API (Llama 3.1)...")
+            chatbot = DocumentChatbot(doc_folder="doc")
+            chatbot.load_documents()
+            print("Chatbot đã sẵn sàng!")
+            print("="*50)
+        except Exception as e:
+            print(f"❌ Lỗi khi khởi tạo chatbot: {e}")
+            import traceback
+            traceback.print_exc()
+            raise
     return chatbot
 
 HTML_TEMPLATE = """
@@ -219,10 +225,20 @@ def ask():
             return jsonify({'answer': 'Xin lỗi, bạn chưa nhập câu hỏi.'}), 400
         
         # Lazy load chatbot khi cần
-        bot = get_chatbot()
-        answer = bot.answer(question)
-        return jsonify({'answer': answer})
+        try:
+            bot = get_chatbot()
+            answer = bot.answer(question)
+            return jsonify({'answer': answer})
+        except Exception as e:
+            print(f"❌ Lỗi khi xử lý câu hỏi: {e}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({'answer': f'Xin lỗi, đã xảy ra lỗi khi xử lý câu hỏi: {str(e)}'}), 500
+            
     except Exception as e:
+        print(f"❌ Lỗi trong route /ask: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'answer': f'Xin lỗi, đã xảy ra lỗi: {str(e)}'}), 500
 
 if __name__ == '__main__':
